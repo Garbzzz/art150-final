@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>The Sound of Color: Sean Garbarini</title>
+  <!-- Google Font Import -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-family: 'Roboto', sans-serif;
+      background: #acacac;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem;
+      color: #333;
+      margin-bottom: 20px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    #container {
+      display: flex;
+      gap: 40px;
+      width: 100%;
+      max-width: 1200px;
+      align-items: flex-start;
+    }
+    /* Left panel: color mixer */
+    #colorPanel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    #colorBox {
+      width: 250px;
+      height: 250px;
+      border: 4px solid #333;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    }
+    #info, #hex {
+      color: #444;
+      text-align: center;
+    }
+    #info { font-size: 1rem; }
+    #hex { font-size: 1.2rem; font-weight: 500; }
+    #reset {
+      padding: 8px 16px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 4px;
+      background: #fff;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+      cursor: pointer;
+    }
+    #reset:hover { background: #e0e0e0; }
+    /* Middle panel: frequency sliders */
+    #freqControls {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 250px;
+    }
+    .sliderGroup {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .sliderGroup label {
+      font-size: 0.9rem;
+      color: #333;
+    }
+    .sliderGroup input[type=range] {
+      width: 100%;
+    }
+    .sliderGroup span {
+      font-size: 0.9rem;
+      color: #555;
+      text-align: right;
+    }
+    #resetFreqs {
+      padding: 6px 12px;
+      font-size: 0.9rem;
+      border: none;
+      border-radius: 4px;
+      background: #fff;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    #resetFreqs:hover { background: #e0e0e0; }
+    /* Right panel: description */
+    #description {
+      max-width: 400px;
+      color: #555;
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <h1>ARTT150 Final Project: Sean Garbarini</h1>
+  <div id="container">
+    <!-- Color Mixer Panel -->
+    <div id="colorPanel">
+      <div id="colorBox"></div>
+      <div id="info">Press or hold <strong>R</strong>, <strong>G</strong>, <strong>B</strong> to adjust channels.</div>
+      <div id="hex">#000000</div>
+      <button id="reset">Reset Colors</button>
+    </div>
+    <!-- Frequency Controls Panel -->
+    <div id="freqControls">
+      <div class="sliderGroup">
+        <label for="blueFreq">Blue Frequency: <span id="blueVal">588 Hz</span></label>
+        <input type="range" id="blueFreq" min="100" max="2000" value="588">
+      </div>
+      <div class="sliderGroup">
+        <label for="greenFreq">Green Frequency: <span id="greenVal">527 Hz</span></label>
+        <input type="range" id="greenFreq" min="100" max="2000" value="527">
+      </div>
+      <div class="sliderGroup">
+        <label for="redFreq">Red Frequency: <span id="redVal">700 Hz</span></label>
+        <input type="range" id="redFreq" min="100" max="2000" value="700">
+      </div>
+      <button id="resetFreqs">Reset Frequencies</button>
+    </div>
+    <!-- Description Panel -->
+    <div id="description">
+      <p>This project explores <strong>hearing colors</strong> by mapping each RGB channel to adjustable sine-wave frequencies. Use the R, G, and B keys to blend color visually in the square and aurally through the oscillators. Adjust each channel's frequency with the sliders on the left to customize how each color sounds. The Reset buttons return you to default color and frequency settings at any time. Experiment to discover new color-sound combinations and understand the relationship between hue and tone. The purpose of this project is to find out you feel a certain color would sound. This can be unique to everybody, which I found out when testing this very program on my friends. I then decided to make it customizable for each person. So have fun and play around with the <strong> SOUND OF COLOR!</strong></strong></p>
+    </div>
+  </div>
+  <script>
+    // Audio setup
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const ctx = new AudioContext();
+    function ensureAudio() { if (ctx.state === 'suspended') ctx.resume(); }
+
+    // Oscillators & Gains
+    const blueOsc = ctx.createOscillator(), blueGain = ctx.createGain();
+    const greenOsc = ctx.createOscillator(), greenGain = ctx.createGain();
+    const redOsc = ctx.createOscillator(), redGain = ctx.createGain();
+
+    [blueOsc, greenOsc, redOsc].forEach(o => o.start());
+    blueOsc.connect(blueGain).connect(ctx.destination);
+    greenOsc.connect(greenGain).connect(ctx.destination);
+    redOsc.connect(redGain).connect(ctx.destination);
+
+    // Default waveform and frequency
+    [blueOsc, greenOsc, redOsc].forEach(o => o.type = 'sine');
+    blueOsc.frequency.value = 588;
+    greenOsc.frequency.value = 527;
+    redOsc.frequency.value = 700;
+
+    blueGain.gain.value = 0;
+    greenGain.gain.value = 0;
+    redGain.gain.value = 0;
+
+    // UI elements
+    const blueSlider = document.getElementById('blueFreq'), blueVal = document.getElementById('blueVal');
+    const greenSlider = document.getElementById('greenFreq'), greenVal = document.getElementById('greenVal');
+    const redSlider = document.getElementById('redFreq'), redVal = document.getElementById('redVal');
+    const resetFreqs = document.getElementById('resetFreqs');
+    const resetCols = document.getElementById('reset');
+    const box = document.getElementById('colorBox'), info = document.getElementById('info'), hexDisplay = document.getElementById('hex');
+
+    // Frequency update
+    function updateFreqs() {
+      ensureAudio();
+      blueOsc.frequency.value = blueSlider.value;
+      greenOsc.frequency.value = greenSlider.value;
+      redOsc.frequency.value = redSlider.value;
+      blueVal.textContent = `${blueSlider.value} Hz`;
+      greenVal.textContent = `${greenSlider.value} Hz`;
+      redVal.textContent = `${redSlider.value} Hz`;
+    }
+    [blueSlider, greenSlider, redSlider].forEach(slider => slider.oninput = updateFreqs);
+    resetFreqs.onclick = () => {
+      blueSlider.value = 588; greenSlider.value = 527; redSlider.value = 700;
+      updateFreqs();
+    };
+
+    // Color state
+    let r=0,g=0,b=0;
+    const down = { r:false, g:false, b:false };
+    window.addEventListener('keydown', e => {
+      ensureAudio();
+      const k=e.key.toLowerCase(); if(down.hasOwnProperty(k)) down[k]=true;
+    });
+    window.addEventListener('keyup', e => { const k=e.key.toLowerCase(); if(down.hasOwnProperty(k)) down[k]=false; });
+    resetCols.onclick = () => { r=g=b=0; };
+    function toHex(v) { return v.toString(16).padStart(2,'0'); }
+    function animate() {
+      if(down.r && r<255) r++;
+      if(down.g && g<255) g++;
+      if(down.b && b<255) b++;
+      box.style.backgroundColor = `rgb(${r},${g},${b})`;
+      info.innerHTML = `Press or hold <strong>R</strong>, <strong>G</strong>, <strong>B</strong><br>R: ${r} &nbsp; G: ${g} &nbsp; B: ${b}`;
+      hexDisplay.textContent = `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+      blueGain.gain.value = (b/255)*0.4;
+      greenGain.gain.value = (g/255)*0.4;
+      redGain.gain.value = (r/255)*0.4;
+      requestAnimationFrame(animate);
+    }
+    updateFreqs();
+    animate();
+  </script>
+</body>
+</html>
